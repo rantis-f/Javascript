@@ -2,8 +2,8 @@ const jwt = require("jsonwebtoken");
 
 const secretKey = "liburan";
 
-function createToken(userId, username, contactNumber,) {
-  const data = { id, name, classes, address, hobby };
+function createToken(userId, username,address, contactNumber) {
+  const data = { userId, username,address, contactNumber};
   return jwt.sign(data, secretKey);
 }
 const arrUser = [
@@ -14,14 +14,14 @@ const arrUser = [
     contactNumber: "08123456789",
   },
   {
-    userId: 1,
-    username: "Rantis",
+    userId: 2,
+    username: "Ran",
     address: "West Pasaman",
     contactNumber: "08123456789",
   },
   {
-    userId: 1,
-    username: "Rantis",
+    userId: 3,
+    username: "Fayyadh",
     address: "West Pasaman",
     contactNumber: "08123456789",
   },
@@ -38,5 +38,5 @@ arrUser.forEach((user) => {
   arrTokens.push(token);
 });
 arrTokens.forEach((token, index) => {
-  console.log(`Siswa dengan id ${index + 1}: menggunakan token: ${token} \n`);
+  console.log(`User dengan id ${index + 1}: menggunakan token: ${token} \n`);
 });

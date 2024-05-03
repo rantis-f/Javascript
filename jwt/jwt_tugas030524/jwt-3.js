@@ -1,38 +1,46 @@
 const jwt = require("jsonwebtoken");
 const secretKey = "liburan";
 
-function createHolidayToken(prayerTime, mealTime, familyTime) {
-    const payload = {
-        prayerTime: prayerTime,
-        mealTime: mealTime,
-        familyTime: familyTime,
-    };
-
-    const token = jwt.sign(payload, secretKey);
-
-    return token;
-}
-
-function verifyHolidayToken(token) {
-    try {
-        const decoded = jwt.verify(token, secretKey,{ expiresIn: "1d" });
-        return decoded; 
-    } catch (error) {
-        return null; 
-    }
+function createToken(prayerTime, mealTime, familyTime) {
+  const data = { prayerTime, mealTime, familyTime };
+  return jwt.sign(data, secretKey);
 }
 
 
-const prayerTime = '06:00 AM';
-const mealTime = '12:00 PM';
-const familyTime = '03:00 PM';
-
-const holidayToken = createHolidayToken(prayerTime, mealTime, familyTime);
-console.log("Token:", holidayToken);
-
-const verifiedHoliday = verifyHolidayToken(holidayToken);
-if (verifiedHoliday) {
-    console.log("Jadwal Kegiatan:", verifiedHoliday);
-} else {
-    console.log("Token kadaluwarsa");
-}
+const arrUser = [
+  {
+    userId: 1,
+    username: "Rantis",
+    prayerTime: "06:00 AM",
+    mealTime: "12:00 PM",
+    familyTime: "03:00 PM",
+  },
+  {
+    userId: 2,
+    username: "Kakak",
+    prayerTime: "06:00 AM",
+    mealTime: "12:00 PM",
+    familyTime: "03:00 PM",
+  },
+  {
+    userId: 3,
+    username: "Adek",
+    prayerTime: "06:00 AM",
+    mealTime: "12:00 PM",
+    familyTime: "03:00 PM",
+  },
+];
+const arrTokens = [];
+arrUser.forEach((user) => {
+  const token = createToken(
+    user.userId,
+    user.username,
+    user.prayerTime,
+    user.mealTime,
+    user.familyTime
+  );
+  arrTokens.push(token);
+});
+arrTokens.forEach((token, index) => {
+  console.log(`User dengan id ${index + 1}: menggunakan token: ${token} \n`);
+});
