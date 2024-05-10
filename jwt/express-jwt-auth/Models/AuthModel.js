@@ -1,32 +1,73 @@
-const {connection} = require("./Config/Connection.js");
-const bycrpt = require("bcrypt");
-const jwt = require("jsonwebtoken");
+const connection = require('../config/connection');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 async function registerUser(name, email, password, phone) {
   try {
     // cek apakah email ini sudah terdaftar / belum?
-    const [existingEmailUser] = await connection.query(
-      "select * from user where email= ?",
+    const [existingUser] = await connection.query(
+      "SELECT * FROM user WHERE email = ?",
       [email]
     );
-    if (existingEmailUser.length > 0) throw new Error("Email already exists");
-    // kita hash password agar tidak dapat  dibaca artinya pastikan yang kita tulis passwordnya hapal
-    // jamal = 32424inknlasdlkdadk1213
-    const hashedPassword = await bycrpt.hash(password, 16);
+    if (existingUser.length > 0) throw new Error("Email already exits");
 
-    // kalau tidak ada maka kita boleh buat email tersebut
+    // Kita hash password agar tidak dapat dibaca artinya pastikan yang kita tulis passwordnya hapal
+    // jamal = 324fjdijgjdigigj
+   
+
+    // kalau tidak ada maka kita boleh buat email tersebut.
+    const hashPassword = bcrypt.hashSync(password, 12)
     const [newUser] = await connection.query(
-      "insert into user(username,email,password,phone) values (?,?,?,?)",
-      [name, email, password, phone]
+      "insert into user (name, email, password, phone) values (?, ?, ?, ?)",
+      [name, email, hashPassword, phone]
     );
+
     return {
       success: true,
       message: "User has been created",
-      data: newUser
+      data: {id:newUser.insertId,name,email,phone}
     };
   } catch (error) {
     throw new Error(error);
   }
 }
 
-module.exports = {registerUser}
+
+// login
+async function loginUser(email, password) {
+  try {
+    const [user] = await connection.query('SELECT * FROM user WHERE email = ?', [email]);
+    if (user.length === 0) {
+      throw new Error('User not found');
+    }
+    const isPasswordValid = await bcrypt.compare(password, user[0].password);
+    if (!isPasswordValid) {
+      throw new Error('Invalid password');
+    }
+    // generate token
+    const createToken = jwt.sign({ email: user[0].email, password: user[0].password }, 'bazmaSecretKey');
+    return { success: true, message: 'Login successful', createToken };
+  } catch (error) {
+    console.error(error);
+    return { success: false, message: error.message };
+  }
+}
+
+
+// Get ME
+async function getMe(token) {
+  try {
+    const decoded = jwt.verify(token.replace('Bearer ', ''), 'bazmaSecretKey');
+    const userData = {
+      id: decoded.id,
+      username: decoded.username,
+      email: decoded.email
+    }
+    return { success: true, message: 'User data retrieved successfully', data: userData };
+  } catch (error) {
+    console.error(error);
+    return { success: false, message: error.message };
+  }
+}
+
+module.exports = { registerUser, loginUser, getMe};
