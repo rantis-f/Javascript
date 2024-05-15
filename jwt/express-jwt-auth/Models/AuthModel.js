@@ -56,7 +56,9 @@ async function loginUser(email, password) {
 
 // Get ME
 async function getMe(token) {
+  
   try {
+  
     const decoded = jwt.verify(token.replace('Bearer ', ''), 'bazmaSecretKey');
     const userData = {
       id: decoded.id,
@@ -70,4 +72,19 @@ async function getMe(token) {
   }
 }
 
-module.exports = { registerUser, loginUser, getMe};
+async function logoutUser(token) {
+  try {
+    const decoded = jwt.verify(token, 'bazmaSecretKey');
+    jwt.sign({ id: decoded.id }, 'bazmaSecretKey', {
+      expiresIn: '1d'
+    });
+
+    return { success: true, message: 'Logout successful' };
+
+  }
+  catch (error) {
+    throw new Error(error);
+  }
+}
+
+module.exports = { registerUser, loginUser, getMe,logoutUser};
